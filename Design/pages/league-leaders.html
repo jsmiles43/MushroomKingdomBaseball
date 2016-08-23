@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Mushroom Kingdom Baseball</title>
+
+    <link rel="icon" href="../images/favicon.ico" type="image/ico" sizes="16x16">
+
+    <script type="text/javascript" src="../assets/js/jquery-3.0.0.min.js"></script>
+    <script type="text/javascript" src="../assets/js/main.js"></script>
+
+    <script type="text/javascript" src="../assets/semantic/dist/semantic.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../assets/semantic/dist/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+
+</head>
+
+<body>
+
+    <header>
+        <a href="../index.html">
+            <img class="ui medium centered image" style="padding-bottom: 2em" src="../images/Mushroom-Kingdom-Baseball_Icon.svg">
+        </a>
+        <nav class="ui centered grid tablet small monitor large monitor only">
+            <nav class="center aligned column">
+                <nav class="ui compact menu">
+
+                    <a class="item" href="news.html">
+                        <i class="red newspaper icon"></i> News
+                    </a>
+
+                    <a class="item" href="#">
+                        <i class="red user icon"></i> Players
+                    </a>
+
+                    <a class="item" href="#">
+                        <i class="red users icon"></i> Teams
+                    </a>
+
+                    <a class="active item" href="#">
+                        <i class="red bar chart icon"></i> League Leaders
+                    </a>
+
+                    <a class="item" href="#">
+                        <i class="red info icon"></i> About
+                    </a>
+
+                    <a class="item" href="#">
+                        <i class="red book icon"></i> Blog
+                    </a>
+
+                    <a class="item" href="#">
+                        <i class="red mail icon"></i> Contact
+                    </a>
+
+                </nav>
+            </nav>
+        </nav>
+    </header>
+
+    <!-- Mobile Nav -->
+    <header>
+        <nav class="ui centered grid mobile only">
+            <nav class="center aligned column">
+                <nav class="ui compact menu">
+
+                    <nav class="ui simple dropdown link item">
+                        <i class="sidebar icon"></i> Menu
+                        <nav class="menu">
+
+                            <a class="item " href="# ">
+                                <i class="red newspaper icon "></i> News
+                            </a>
+
+                            <a class="item " href="# ">
+                                <i class="red user icon "></i> Players
+                            </a>
+
+                            <a class="item " href="# ">
+                                <i class="red users icon "></i> Teams
+                            </a>
+
+                            <a class="active item " href="# ">
+                                <i class="red bar chart icon "></i> League Leaders
+                            </a>
+
+                            <a class="item " href="# ">
+                                <i class="red info icon "></i> About
+                            </a>
+
+                            <a class="item " href="# ">
+                                <i class="red book icon "></i> Blog
+                            </a>
+
+                            <a class="item " href="# ">
+                                <i class="red mail icon "></i> Contact
+                            </a>
+
+                        </nav>
+                    </nav>
+                </nav>
+            </nav>
+        </nav>
+    </header>
+
+    <!-- Content -->
+     <div class="ui grid container" style="padding-top: 2em;">
+        <div id="page-title">
+            <h3 id="team-name">Batting Statistics</h3>
+        </div>
+         
+        <div id="roster"></div>
+    </div>
+
+    <!-- D3 Scripts -->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="../data/roster.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<link rel="shortcut icon" href="http://www.usnews.com/static/images/favicon.ico
+" type="image/x-icon" />
+
+<head>
+    <title>U.S. News &amp; World Report Best Colleges 1988-2015</title>
+    <style>
+        @font-face {
+            font-family: 'latolight';
+            src: url('fonts/Lato-Light-webfont.eot');
+            src: url('fonts/Lato-Light-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/Lato-Light-webfont.woff2') format('woff2'), url('fonts/Lato-Light-webfont.woff') format('woff'), url('fonts/Lato-Light-webfont.ttf') format('truetype'), url('fonts/Lato-Light-webfont.svg#latolight') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'latobold';
+            src: url('fonts/Lato-Bold-webfont.eot');
+            src: url('fonts/Lato-Bold-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/Lato-Bold-webfont.woff2') format('woff2'), url('fonts/Lato-Bold-webfont.woff') format('woff'), url('fonts/Lato-Bold-webfont.ttf') format('truetype'), url('fonts/Lato-Bold-webfont.svg#latolight') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+        /* This template is just a simple "stage" for posting different types of graphs. A few 
+	examples of standard graph types are shown here. You should be able to adapt any kind 
+	of D3.js graph to fit into this template. */
+        
+        body {
+            font-size: 10pt;
+            font-family: 'latolight', Helvetica, sans-serif;
+        }
+        
+        #graph {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        #title {
+            font-size: 3em;
+            font-weight: 100;
+            fill: gray;
+            opacity: .5;
+            pointer-events: none;
+        }
+        
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+        
+        .bar {
+            fill: pink;
+        }
+        
+        .bar:hover {
+            fill: orangered;
+        }
+        
+        .x.axis path {
+            display: none;
+        }
+        
+        .d3-tip {
+            line-height: 1;
+            font-weight: bold;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 2px;
+        }
+        
+        .line,
+        .line2,
+        .line3 {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 1px;
+            stroke-opacity: 0.2;
+            stroke-linecap: "round";
+        }
+        /*the things we don't want to trigger mouseover events go here */
+        
+        .line,
+        .circle,
+        .line2,
+        .pathtext {
+            pointer-events: none;
+        }
+        
+        .line2 {
+            visibility: hidden;
+            stroke: gray;
+        }
+        
+        .line3 {
+            stroke: transparent;
+            stroke-width: 30px;
+        }
+        
+        .axis text {
+            font-size: 11pt;
+        }
+        
+        .axis_label {
+            font-weight: 100;
+            font-size: 18pt !important;
+            opacity: .5 !important;
+        }
+        /* Creates a small triangle extender for the tooltip */
+        
+        .d3-tip:after {
+            box-sizing: border-box;
+            display: inline;
+            font-size: 10px;
+            width: 100%;
+            line-height: 1;
+            color: rgba(0, 0, 0, 0.8);
+            content: "\25BC";
+            position: absolute;
+            text-align: center;
+        }
+        /* Style northward tooltips differently */
+        
+        .d3-tip.n:after {
+            margin: -1px 0 0 0;
+            top: 100%;
+            left: 0;
+        }
+        
+        .d3-tip_value {
+            color: red;
+        }
+        
+        svg {}
+        
+        circle {
+            stroke: white;
+            stroke-width: 2px;
+            stroke-opacity: .9;
+        }
+        
+        #caption {
+            position: absolute;
+            top: 100;
+            left: 100;
+            font-weight: bold;
+            color: black;
+            opacity: 1;
+            font-size: 14pt;
+            text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff;
+        }
+        
+        .pathtext {
+            opacity: .5;
+        }
+        
+        .nodelabel {
+            stroke: black;
+            text-anchor: middle;
+            opacity: .5;
+        }
+    </style>
+    <script src="http://vizsociety.net/shared/d3/d3.v3.min.js"></script>
+    <script src="http://vizsociety.net/shared/js/jquery-1.10.2.js"></script>
+    <script src="http://vizsociety.net/shared/js/shared.js"></script>
+    <script>
+        /* define our graph parameters */
+
+        //set up the size of the graph
+
+        var margin = {
+                top: 50,
+                right: 20,
+                bottom: 40,
+                left: 50
+            },
+            width = window.innerWidth * .98,
+            height = window.innerHeight * .97;
+
+        var x = d3.scale.linear()
+            .range([0, width]);
+
+        /*var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .1); //this line sets the size of it in pixels, based on the width we already set up above
+        */
+
+        //our y axis is a numerical axis, scaled linearly (as opposed to logarithmically)
+        var y = d3.scale.linear()
+            .range([height, 0]); //again, we set it scale in pixels based on our height
+
+        //create the x axis, put it at the bottom, based on the our previously-set scale
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom")
+            .tickFormat(d3.format("d")) //removes commas from numbers on axis
+            .ticks(23);
+
+        //ditto for the y axis, on the left
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .ticks(20) //this just says "make 20 different tick categories" -- otherwise it tries to guess 
+            //.tickFormat(formatPercent) //this last line says, "make the y axis a percentage" — comment it out if you don't want that
+        ;
+
+
+        /* create the SVG for the graph */
+
+        var svg;
+
+
+        var names_data = []; //a data array we will use to process the data in a secondary way (divide it up by cities)
+        var names = [];
+        var names_array = [];
+        var text_paths = 0;
+
+        function init() {
+
+                //master SVG element which will hold the graphical data — we add it to the body element of the HTML, define its size
+                svg = d3.select("#graph").append("svg")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("viewBox", "-" + margin.left + " -" + margin.top + " " + (width + margin.left + margin.right) + " " + (height + margin.top + margin.bottom)) //this last line makes it resize along with the browser window
+
+                //add a title
+                svg.append("text")
+                    .attr("id", "title")
+                    .style("text-anchor", "middle")
+                    .attr("x", width / 2)
+                    .attr("dy", "-16px")
+                    .text("U.S. News & World Report Best Colleges 1988-2015");
+
+                var defs = svg.append("svg:defs");
+
+                //load the data
+                d3.csv(
+                    "bestcolleges.csv", //path to the csv file
+                    function (d) { //pre-processing function that runs on every row of data in the file (d)
+
+                        //what's going on here? we've got three arrays that we are making from the data.
+                        //names_array is just a list of college names. It is set up so there can only
+                        //	be one entry for each college. otherwise it tries to draw a line for every instance of a
+                        //	college being mentioned (which is many times for most)
+                        //names is the same thing but with an object inside it with an item designed as the "name"
+                        //	the reason for this is because this is how d3 wants to read the data in its loop.
+                        //data is an array keyed to the college name, set up so that every year/rank is keyed to that college.
+                        //
+                        //why have we done it this way? because d3 by default doesn't really want to recognize the different
+                        //categories of cities, it wants to read everything as one big dataset. what we're doing here is making it
+                        //so that each college is basically like its own datafile. 		
+                        if (names_array.indexOf(d.name) == -1) {
+                            names_array.push(d.name);
+                            names.push({
+                                "name": d.name
+                            });
+                        }
+                        if (typeof names_data[d.name] == "undefined") names_data[d.name] = [];
+                        console.log(d);
+                        //cycle through all years	
+                        for (var year = 1988; year <= 2015; year++) {
+                            //if the "year" column (e.g. "1790") is non-zero, add it to the
+                            //secondary data array we will use
+
+                            if (d[year]) {
+                                names_data[d.name].push({
+                                    "year": year,
+                                    "rank": (+d[year])
+                                });
+                            }
+                        }
+                        return d;
+                    },
+                    function (error, data) { //function that runs after all the data runs (data)
+
+                        console.log(data, names_data);
+                        //what do we want our x axis to be for this graph? if we want it to be years, a column (rather than row) piece of
+                        //data, we will need to create the axis from scratch. This is not very hard to do:  
+
+                        //create a list of all the years we want
+                        var years = [];
+                        for (var i = 1988; i <= 2015; i = i + 1) {
+                            years.push(i);
+                        }
+
+                        x.domain([1988, 2015]); //use it as the x categories
+                        y.domain([50, 1]); //y category is a linear range from 50 to 1 (reversed so 1 is at the top)
+
+                        //add a new "g" (group) element to the SVG, make it the a x axis
+                        svg.append("g")
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(xAxis);
+
+                        //add the y axis, and add a caption
+                        svg.append("g")
+                            .attr("class", "y axis")
+                            .call(yAxis)
+                            .append("text") //the caption — add a text element to the axis
+                            .attr("transform", "rotate(-90)") //rotate it 90 degrees counterclockwise
+                            .attr("y", 6) //move it a little off of the baseline using absolute coordinates
+                            .attr("dy", ".71em") //ditto, using relative coordinates
+                            .style("text-anchor", "end") //tell it where to align the text vis a vis the axis
+                            .attr("class", "axis_label")
+                            .text("College Rank: "); //set the text inside of the caption
+
+
+                        //line function for parsing out x and y
+                        var line1 = d3.svg.line()
+                            .x(function (d) {
+                                return x(+d.year);
+                            })
+                            .y(function (d) {
+                                return y(+d.rank);
+                            })
+                            .interpolate("basis");
+
+                        //line function for parsing out x and y
+                        var line2 = d3.svg.line()
+                            .x(function (d) {
+                                return x(+d.year);
+                            })
+                            .y(function (d) {
+                                return y(+d.rank);
+                            })
+                            .interpolate("step");
+
+                        //color function for categories
+                        var color = d3.scale.category20();
+
+                        //we have divided up the data so that each college has its own data associated with it
+                        //so we loop over all the cities and draw the lines	
+                        for (c in names) {
+                            //first the stepped one, so it is in the back
+                            svg.selectAll("lines")
+                                .data([names[c]])
+                                .enter()
+                                .append("path")
+                                .attr("class", function (d) {
+                                    return "line2 " + cssSanitize(d.name)
+                                })
+                                .attr("id", function (d) {
+                                    return "college_path2_" + names_array.indexOf(d.name)
+                                })
+                                .attr("d", function (d) {
+                                    return line2(names_data[d.name]); //pass the data to the line function
+                                })
+
+                            //then the an invisible but fat smooth line that triggers the mouseover event
+                            svg.selectAll("lines")
+                                .data([names[c]])
+                                .enter()
+                                .append("path")
+                                .attr("class", function (d) {
+                                    return "line3 " + cssSanitize(d.name)
+                                })
+                                .attr("id", function (d) {
+                                    return "college_path3_" + names_array.indexOf(d.name)
+                                })
+                                .attr("d", function (d) {
+                                    return line1(names_data[d.name]); //pass the data to the line function
+                                })
+                                .on('mousemove', function (d) {
+                                    d3.selectAll(".college_dot_" + names_array.indexOf(d.name)).style("visibility", "visible");
+                                    d3.select("#college_path_" + names_array.indexOf(d.name)).style("stroke-width", "5").style("stroke-opacollege", "1");
+                                    d3.select("#college_path2_" + names_array.indexOf(d.name)).style("visibility", "visible").style("stroke-width", "5").style("stroke-opacollege", ".3");
+                                    d3.select("#caption").style("visibility", "visible").text(d.name);
+                                }) //set an event: when the mouse is over the data, show the tooltip
+                                .on('mouseout', function (d) {
+                                    d3.selectAll(".college_dot_" + names_array.indexOf(d.name)).style("visibility", "hidden");
+                                    d3.select("#college_path_" + names_array.indexOf(d.name)).style("stroke-width", "1").style("stroke-opacollege", ".25");
+                                    d3.select("#college_path2_" + names_array.indexOf(d.name)).style("visibility", "hidden");
+
+                                    d3.select("#caption").style("visibility", "hidden").text("");
+                                }) //set an event: when the mouse leaves the data, hide the tooltip
+                            ;
+
+
+                            //then the smooth line that sits on the top
+                            svg.selectAll("lines")
+                                .data([names[c]])
+                                .enter()
+                                .append("path")
+                                .attr("class", function (d) {
+                                    return "line " + cssSanitize(d.name)
+                                })
+                                .attr("id", function (d) {
+                                    return "college_path_" + names_array.indexOf(d.name)
+                                })
+                                .style("stroke", function (d) {
+                                    return color(names_array.indexOf(d.name))
+                                })
+                                .attr("d", function (d) {
+                                    console.log(cssSanitize(d.name));
+                                    return line1(names_data[d.name]); //pass the data to the line function
+                                })
+
+                            //something fun — put names on the lines
+                            svg.selectAll("lines")
+                                .data([names[c]])
+                                .enter()
+                                .append("g")
+                                .each(function (d) {
+                                    var dpath = names_data[d.name];
+                                    defs.append("path")
+                                        .attr("id", "text_path_def_" + cssSanitize(d.name))
+                                        .attr("d", function (d) {
+                                            return line1(dpath)
+                                        });
+
+                                    d3.select(this).append("text")
+                                        .attr("class", "pathtext")
+                                        .attr("id", "text_path_text_" + cssSanitize(d.name))
+                                        .style("text-anchor", "left")
+                                        .attr("dy", "-2px")
+                                        .append("textPath")
+                                        .attr("id", "text_path_" + cssSanitize(d.name))
+                                        .attr("startOffset", "25%")
+                                        .attr("xlink:href", "#text_path_def_" + cssSanitize(d.name))
+                                        .text(function (d) {
+                                            return d.name
+                                        });
+                                    text_paths++;
+                                });
+                        }
+
+                        //now we render some circles that will be visible when mousing over
+                        //this is a little trickier than above
+                        svg.selectAll("circles")
+                            .data(data)
+                            .enter()
+                            .append("g")
+                            .each(function (d) {
+                                //iterate over all the years
+                                for (var year = 1988; year <= 2012; year = year + 1) {
+                                    if (d[year]) { //if there is a rank for this year
+                                        d3.select(this).append("circle")
+                                            .attr("class", function (d) {
+                                                return "circle college_dot_" + names_array.indexOf(d.name)
+                                            })
+                                            .attr("cx", function (d) {
+                                                return x(year)
+                                            })
+                                            .attr("cy", function (d) {
+                                                return y(d[year])
+                                            })
+                                            .style("fill", function (d) {
+                                                return color(names_array.indexOf(d.name));
+                                            })
+                                            .style("visibility", "hidden")
+                                            .attr("r", 7);
+                                        d3.select(this).append("g")
+                                            .append("text")
+                                            .attr("class", function (d) {
+                                                return "nodelabel college_dot_" + names_array.indexOf(d.name)
+                                            })
+                                            .attr("dx", function (d) {
+                                                return x(year)
+                                            })
+                                            .attr("dy", function (d) {
+                                                return y(d[year]) - 10
+                                            })
+                                            .text(function (d) {
+                                                return d[year]
+                                            })
+                                            .style("visibility", "hidden")
+
+                                    }
+                                }
+                            })
+
+                        //some manual adjustments
+                        /* d3.select("#text_path_Buffalo").attr("startOffset", "40%");
+                        d3.select("#text_path_Chicago").attr("startOffset", "50%");
+                        d3.select("#text_path_St_Louis").attr("startOffset", "35%");
+                        d3.select("#text_path_Indianapolis").attr("startOffset", "0%");
+                        d3.select("#text_path_text_Indianapolis").style("font-size", "8pt");
+                        d3.select("#text_path_Cleveland").attr("startOffset", "20%");
+                        d3.select("#text_path_Richmond").attr("startOffset", "55%");
+                        d3.select("#text_path_Nantucket").attr("startOffset", "48%");
+                        d3.select("#text_path_Savannah").attr("startOffset", "60%");
+                        d3.select("#text_path_New_Haven").attr("startOffset", "65%");
+                        d3.select("#text_path_Newark").attr("startOffset", "10%");
+                        d3.select("#text_path_Norfolk").attr("startOffset", "15%");
+                        d3.select("#text_path_Schenectady_NY").attr("startOffset", "15%");
+                        d3.select("#text_path_New_London_CT").attr("startOffset", "15%");
+                        d3.select("#text_path_Gloucester_MA").attr("startOffset", "5%");
+                        d3.select("#text_path_Middleborough_MA").attr("startOffset", "45%");
+                        d3.select("#text_path_Portsmouth_NH").attr("startOffset", "20%");
+                        d3.select("#text_path_text_New_York").attr("dy", "13px"); */
+                        //d3.select(".college_dot_"+names_array.indexOf("New London, CT")).style("visibility","visible");
+
+                        //lastly, we track the mouse movement and put the caption at it (the caption is invisible unless over a line)
+
+                        $("svg").mousemove(function (event) {
+                            if (event.pageY > 50) { //check the Y position
+                                d3.select("#caption").style("left", (event.pageX - 35) + "px").style("top", (event.pageY - 25) + "px");
+                            } else {
+                                //too close to top, change where the text is
+                                d3.select("#caption").style("left", (event.pageX - 35) + "px").style("top", (event.pageY + 10) + "px");
+                            }
+                        })
+
+                    });
+
+            }
+            //all done!
+
+        //resizes the svg to the window whenever the window size changes
+        function updateWindow() {
+            var w = window;
+            var window_width = w.innerWidth || e.clientWidth || g.clientWidth;
+            var window_height = w.innerHeight || e.clientHeight || g.clientHeight;
+
+            svg.attr("height", window_height);
+        }
+        window.onresize = updateWindow;
+
+        //gets rid of things that mess up the CSS ids
+        function cssSanitize(s) {
+            return s.replace(/\W+/g, "_");
+        }
+    </script>
+</head>
+
+<body onload="init();">
+    <div id="graph"></div>
+    <div id="caption"></div>
+</body>
+
+</html>
+
+</html>
