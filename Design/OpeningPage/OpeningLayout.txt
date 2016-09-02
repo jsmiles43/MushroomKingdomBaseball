@@ -1,0 +1,6 @@
+Mushroom Kingdom Baseball Logo
+Title
+Navigation Bar to videos, player stats, etc
+GridLayout w/ three columns
+left and right columns contain player images that change everytime you refresh?
+Middle column contains newsfeed of current stories

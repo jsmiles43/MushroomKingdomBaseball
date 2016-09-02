@@ -1,0 +1,8 @@
+General Newfeed Layout:  
+
+Title
+Picture or video
+Description (first few words)
+Like Option
+tags
+comments
